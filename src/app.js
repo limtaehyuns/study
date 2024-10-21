@@ -16,3 +16,5 @@ createFolder("./output");
 processedHtmlInvoice.forEach((invoice) => {
   fs.writeFileSync(`./output/${invoice.customerName}.html`, invoice.html);
 });
+
+console.log("🚀 Your invoice is ready");
