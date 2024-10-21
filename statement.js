@@ -1,7 +1,6 @@
 function statement(invoice, plays) {
   let totalAmount = 0; // 총 공연료
   let volumeCredits = 0; // 포인트
-  let result = `청구 내역 (고객명: ${invoice.customer})\n`; // 청구 내역
 
   const format = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -9,20 +8,26 @@ function statement(invoice, plays) {
     minimumFractionDigits: 2,
   }).format;
 
-  for (let perf of invoice.performances) {
+  const { performances } = invoice;
+  const preformanceResult = performances.map((perf) => {
     const play = plays[perf.playID];
     let thisAmount = calculateAmount(perf, play);
     volumeCredits += calculateVolumeCredits(perf, play);
-
-    result += `  ${play.name}: ${format(thisAmount / 100)} (${
-      perf.audience
-    }석)\n`;
     totalAmount += thisAmount;
-  }
 
-  result += `총액: ${format(totalAmount / 100)}\n`;
-  result += `적립 포인트: ${volumeCredits}점\n`;
-  return result;
+    return {
+      playName: play.name,
+      amount: thisAmount,
+      audience: perf.audience,
+    };
+  });
+
+  return {
+    customer: invoice.customer,
+    performances: preformanceResult,
+    totalAmount: format(totalAmount / 100),
+    volumeCredits: format(volumeCredits),
+  };
 }
 
 // 상수 정의
