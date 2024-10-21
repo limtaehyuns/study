@@ -13,6 +13,7 @@ function statement(invoice, plays) {
     const play = plays[perf.playID];
     let thisAmount = calculateAmount(perf, play);
     volumeCredits += calculateVolumeCredits(perf, play);
+
     result += `  ${play.name}: ${format(thisAmount / 100)} (${
       perf.audience
     }석)\n`;
@@ -25,37 +26,50 @@ function statement(invoice, plays) {
 }
 
 function calculateAmount(perf, play) {
-  let thisAmount = 0;
   const { type: playType } = play;
 
   if (playType === "tragedy") {
-    thisAmount = 40000;
+    let amount = 40000;
     if (perf.audience > 30) {
-      thisAmount += 1000 * (perf.audience - 30);
+      amount += 1000 * (perf.audience - 30);
     }
 
-    return thisAmount;
+    return amount;
   }
 
   if (playType === "comedy") {
-    thisAmount = 30000;
+    let amount = 30000;
     if (perf.audience > 20) {
-      thisAmount += 10000 + 500 * (perf.audience - 20);
+      amount += 10000 + 500 * (perf.audience - 20);
     }
-    thisAmount += 300 * perf.audience;
 
-    return thisAmount;
+    amount += 300 * perf.audience;
+
+    return amount;
+  }
+
+  if (playType === "history") {
+    let amount = 10000; // 기본 가격
+    amount += 1500 * perf.audience; // 1인당 1500원
+
+    return amount;
   }
 
   throw new Error(`알 수 없는 장르: ${playType}`);
 }
 
 function calculateVolumeCredits(perf, play) {
-  let volumeCredits = Math.max(perf.audience - 30, 0);
+  const { type: playType } = play;
+  const { audience } = perf;
 
-  // 희극 관객 5명마다 추가 포인트를 제공한다.
-  if (play.type === "comedy") {
-    volumeCredits += Math.floor(perf.audience / 5);
+  let volumeCredits = Math.max(audience - 30, 0);
+
+  if (playType === "comedy") {
+    volumeCredits += Math.floor(audience / 5);
+  }
+
+  if (playType === "history" && audience > 20) {
+    volumeCredits += 10;
   }
 
   return volumeCredits;
